@@ -1,0 +1,109 @@
+name: PsycheOS
+version: "1.0.0"
+description: >
+  A multi-agent reinforcement learning environment for mental health crisis
+  detection, empathetic response generation, and autonomous escalation.
+  Models a partially observable patient world across multi-session interactions.
+  Five specialized agents cooperate in a LangGraph state machine trained via GRPO.
+
+author: Mesa Sarah Vasantha Zephyr
+license: MIT
+tags:
+  - mental-health
+  - multi-agent
+  - crisis-detection
+  - self-improvement
+  - grpo
+  - dpo
+  - long-horizon
+
+environment:
+  id: PsycheOS-v1
+  entry_point: environment.psycheos_env:PsycheOSEnv
+  max_episode_steps: 20
+  reward_threshold: 0.85
+
+observation_space:
+  type: dict
+  fields:
+    message:
+      type: text
+      description: Raw patient message text
+    session_history:
+      type: list
+      description: Last 3 session turns with distress labels
+    turn:
+      type: int
+      description: Current turn within session
+    session:
+      type: int
+      description: Session number (cross-session memory active)
+
+action_space:
+  type: dict
+  fields:
+    distress_level:
+      type: discrete
+      n: 5
+      description: Predicted patient distress severity (1=stable, 5=crisis)
+    response:
+      type: text
+      description: Empathetic response to patient message
+    escalate:
+      type: discrete
+      n: 2
+      description: Whether to escalate to human counselor (0=no, 1=yes)
+
+reward:
+  type: composite
+  components:
+    - name: detection_f1
+      weight: 0.40
+      description: F1-proxy reward for distress level classification accuracy
+    - name: empathy_dpo
+      weight: 0.40
+      description: DPO preference margin from simulated psychiatrist evaluators
+    - name: escalation_precision
+      weight: 0.20
+      description: Binary escalation precision/recall with 10x false-negative penalty
+
+agents:
+  - name: DetectorAgent
+    role: Classifies distress severity 1-5 from free text
+  - name: EmpathyAgent
+    role: Generates clinically appropriate responses (DPO fine-tuned)
+  - name: CrisisEscalatorAgent
+    role: Routes to human counselor when crisis detected
+  - name: OversightAgent
+    role: Monitors agents for contradictions and tone mismatches
+  - name: CurriculumAgent
+    role: Auto-generates harder episodes when agents plateau
+
+training:
+  framework: GRPO
+  library: HuggingFace TRL + Unsloth
+  base_model: unsloth/llama-3-8b-instruct
+  adapter: LoRA (r=16, alpha=32)
+  quantization: 4-bit
+  script: training/grpo_train.py
+  notebook: training/colab_training.ipynb
+
+self_improvement:
+  strategy: curriculum_self_play
+  description: >
+    Curriculum agent tracks rolling reward. When improvement drops below 2%
+    over 50 episodes, harder patient scenarios are auto-generated.
+    DPO fine-tunes empathy agent on psychiatrist preference pairs each epoch.
+
+themes:
+  - Theme 1 - Multi-Agent Interactions
+  - Theme 3 - World Modeling (Personalized Tasks)
+  - Theme 4 - Self-Improvement
+  - Theme 5 - Wild Card
+
+bonus_prizes:
+  - Fleet AI (Scalable Oversight)
+  - Snorkel AI (Simulated Experts-in-the-Loop)
+  - Halluminate (Multi-Actor Environments)
+
+space_url: https://huggingface.co/spaces/mesazephyr/psycheos
