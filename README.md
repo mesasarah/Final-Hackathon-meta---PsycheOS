@@ -52,7 +52,7 @@ The gap is not just statistical — it is deadly. Delayed crisis identification 
 PsycheOS is simultaneously:
 
 1. **A real deployable app** — open it in your browser right now, talk to it
-2. **An OpenEnv RL training environment** — Gymnasium-compatible POMDP with measurable reward signals
+2. **An OpenEnv RL training environment** — Gymnasium-compatible POMDP with measurable reward signals and send them back
 3. **A self-improving multi-agent system** — gets measurably better at crisis detection through GRPO + curriculum self-play
 
 ---
